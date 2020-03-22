@@ -1,7 +1,8 @@
 import requests, json
+import wx
 from pprint import pprint
 from datetime import datetime
-
+from json import JSONEncoder
 
 class Gw2Gold(object):
     def __init__(self, value = None) -> None:
@@ -40,10 +41,43 @@ class Gw2Gold(object):
     def __repr__(self) -> str:
         return "Gw2Gold('" + str(self) + "')"
 
+class Gw2Velocity(object):
+    def __init__(self, buy, sell, supply, demand):
+        if(buy == 0 | sell == 0 | supply == 0 | demand == 0):
+            print("Buy, sell, supply or demand is 0")
+            pass
+        
+        self.buy = buy 
+        self.sell = sell
+        self.supply = supply
+        self.demand = demand
+       
+    def __str__(self) -> str:
+        try:
+            VelCircs = self.supply / self.sell
+            VelCircb = self.supply / self.buy
+            TVel = self.supply + self.demand
+            Total = self.buy + self.sell
+            TotalVel = TVel / Total
+            return '\n Buy velocity: {}, \n Sell velocity: {}, \n Total Velocity(buy and sell): {}'.format(VelCircb, VelCircs, TotalVel)
+        except Exception as b:
+            print('Supply or Demand is 0')
+            pass
+    def __repr__(self) -> str:
+        return "Gw2Velocity('" + str(self) + "')"
+        
+class Encoder(JSONEncoder):
+        def default(self,o):
+            return o.__dict__ 
+        
+        
+                
+    
+                
 if __name__ == '__main__':
-    #Item ids, name
+#item ids, name
     Names = requests.get("http://api.gw2tp.com/1/bulk/items-names.json").json()
-    #Every item on the trading post right now 
+#every item on the trading post right now 
     Prices = requests.get("http://api.gw2tp.com/1/bulk/items.json").json()
 
     NamesMapping = {
@@ -63,9 +97,13 @@ if __name__ == '__main__':
             "Buy": Gw2Gold(item[1]),
             "Sell": Gw2Gold(item[2]),
             "Supply": item[3],
-            "Demand": item[4]
+            "Demand": item[4],
+            "Velocity": Gw2Velocity(item[1], 
+                                    item[2], 
+                                    item[3], 
+                                    item[4])
         }
-
+    
     ExampleItems = {
         1: {
             "Name": "ItemName",
@@ -89,6 +127,7 @@ if __name__ == '__main__':
             print(f'{ThisItem["Name"]} (id {itemid}):')
             print(f'  Buying:  {ThisItem["Buy"]} ({ThisItem["Demand"]} demand)')
             print(f'  Selling: {ThisItem["Sell"]} ({ThisItem["Supply"]} supply)')
+            print(f' {ThisItem["Name"]} velocity is {ThisItem["Velocity"]})')
         except KeyError as e:
             print(f'No item {itemid}')
             pass
@@ -101,6 +140,6 @@ if __name__ == '__main__':
             pass
     print('Good bye')
     with open('Output.json', mode='w', encoding='utf-8') as outputfile:
-        json.dump(Items, outputfile)
-
+        json.dumps(outputfile, cls=Encoder)
+        
     exit()
