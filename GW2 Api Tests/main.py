@@ -8,6 +8,9 @@ class Gw2Gold(object):
     def __init__(self, value = None) -> None:
         if type(value) == int:
             self.copper = value
+            self.silver = self.copper // 100
+            self.gold = self.silver // 100
+            self.cop = self.copper % 100
         elif type(value) == str:
             stuff = value.split(',')
             if len(stuff) == 3:
@@ -31,6 +34,7 @@ class Gw2Gold(object):
         gold = silver // 100
         silver = silver % 100
         copper = self.copper % 100
+        
         if gold != 0:
             return '{:4d} gold, {:2d} silver, {:2d} copper'.format(gold, silver, copper)
         elif silver != 0:
@@ -51,6 +55,8 @@ class Gw2Velocity(object):
         self.sell = sell
         self.supply = supply
         self.demand = demand
+        
+        
        
     def __str__(self) -> str:
         try:
@@ -59,6 +65,7 @@ class Gw2Velocity(object):
             TVel = self.supply + self.demand
             Total = self.buy + self.sell
             TotalVel = TVel / Total
+            
             return '\n Buy velocity: {}, \n Sell velocity: {}, \n Total Velocity(buy and sell): {}'.format(VelCircb, VelCircs, TotalVel)
         except Exception as b:
             print('Supply or Demand is 0')
@@ -66,19 +73,25 @@ class Gw2Velocity(object):
     def __repr__(self) -> str:
         return "Gw2Velocity('" + str(self) + "')"
         
-class Encoder(JSONEncoder):
-        def default(self,o):
-            return o.__dict__ 
-        
+class Encoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, Gw2Gold):
+            return {o.gold: 'Gold',o.silver: 'Silver', o.cop: 'Copper'}
+        if isinstance(o, Gw2Velocity):
+            return {'Buy Velocity:': o.VelCircb, 'Sell Velocity:': o.VelCircs, 'Total Velocity:': o.TotalVel}
+        return super(Encoder, self).default(o)
+      
         
                 
     
                 
 if __name__ == '__main__':
 #item ids, name
-    Names = requests.get("http://api.gw2tp.com/1/bulk/items-names.json").json()
+    Names = requests.get(
+        "http://api.gw2tp.com/1/bulk/items-names.json").json()
 #every item on the trading post right now 
-    Prices = requests.get("http://api.gw2tp.com/1/bulk/items.json").json()
+    Prices = requests.get(
+        "http://api.gw2tp.com/1/bulk/items.json").json()
 
     NamesMapping = {
         k: v for k, v in Names['items']
@@ -139,7 +152,8 @@ if __name__ == '__main__':
             print(e)
             pass
     print('Good bye')
-    with open('Output.json', mode='w', encoding='utf-8') as outputfile:
-        json.dumps(outputfile, cls=Encoder)
+    with open('Output.json', mode='w+', encoding='utf-8') as outputfile:
+        
+        json.dumps(Items, cls=Encoder)
         
     exit()
