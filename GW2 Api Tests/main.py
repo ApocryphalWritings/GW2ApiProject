@@ -1,9 +1,8 @@
 import requests, json
-import wx
+import os
 from pprint import pprint
 from datetime import datetime
 from json import JSONEncoder
-
 class Gw2Gold(object):
     def __init__(self, value = None) -> None:
         if type(value) == int:
@@ -105,7 +104,10 @@ if __name__ == '__main__':
  
     Items = dict()
     for item in Prices['items']:
+        
+            
         Items[item[0]] = {
+            
             "Name": NamesMapping[item[0]],
             "Buy": Gw2Gold(item[1]),
             "Sell": Gw2Gold(item[2]),
@@ -115,7 +117,7 @@ if __name__ == '__main__':
                                     item[2], 
                                     item[3], 
                                     item[4])
-        }
+            }
     
     ExampleItems = {
         1: {
@@ -156,4 +158,3 @@ if __name__ == '__main__':
         
         json.dumps(Items, cls=Encoder)
         
-    exit()
