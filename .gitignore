@@ -4,4 +4,4 @@ __pycache__
 venv
 *.json
 GW2 Api Tests/Commands.py
-.gitignore
+
