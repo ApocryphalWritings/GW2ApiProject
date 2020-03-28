@@ -2,7 +2,6 @@
 
 import requests
 import json
-import wx
 from pprint import pprint
 from datetime import datetime
 from json import JSONEncoder
