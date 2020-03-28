@@ -12,16 +12,36 @@ class Gw2Gold(object):
     def __init__(self, value=None) -> None:
         if type(value) == int:
             self.copper = value
-            self.silver = self.copper // 100
-            self.gold = self.silver // 100
-            self.cop = self.copper % 100
+        elif type(value) == str:
+            stuff = value.split(',')
+            if len(stuff) == 3:
+                gold = int(stuff[0].split()[0])
+                silver = int(stuff[1].split()[0])
+                copper = int(stuff[2].split()[0])
+            elif len(stuff) == 2:
+                gold = 0
+                silver = int(stuff[0].split()[0])
+                copper = int(stuff[1].split()[0])
+            else:
+                gold = 0
+                silver = 0
+                copper = int(stuff[0].split()[0])
+            self.copper = copper + 100 * silver + 10000 * gold
+        else:
+            self.copper = 0
 
-    def __str__(self) -> str:
+    def get_coins(self) -> tuple:
+        """
+        Returns the number of gold, silver, and copper as a tuple
+        """
         silver = self.copper // 100
         gold = silver // 100
         silver = silver % 100
         copper = self.copper % 100
+        return (gold, silver, copper)
 
+    def __str__(self) -> str:
+        gold, silver, copper = self.get_coins()
         if gold != 0:
             return '{:4d} gold, {:2d} silver, {:2d} copper'.format(
                 gold, silver, copper
@@ -77,7 +97,8 @@ class Gw2Velocity(object):
 class Encoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, Gw2Gold):
-            return {o.gold: 'Gold', o.silver: 'Silver', o.cop: 'Copper'}
+            gold, silver, copper = o.get_coins()
+            return {'Gold': gold, 'Silver': silver, 'Copper': copper}
         if isinstance(o, Gw2Velocity):
             return {
                 'Buy Velocity:': o.v1,
