@@ -156,5 +156,3 @@ if __name__ == '__main__':
     print('Good bye')
     with open('Output.json', mode='w+', encoding='utf-8') as outputfile:
         outputfile.write(json.dumps(Items, cls=Encoder))
-
-    exit()

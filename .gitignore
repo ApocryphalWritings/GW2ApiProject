@@ -3,3 +3,5 @@ __pycache__
 *.pyc
 venv
 *.json
+GW2 Api Tests/Commands.py
+.gitignore
