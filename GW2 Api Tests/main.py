@@ -5,6 +5,7 @@ import json
 from pprint import pprint
 from datetime import datetime
 from json import JSONEncoder
+from argparse import ArgumentParser
 
 
 class Gw2Gold(object):
@@ -87,6 +88,16 @@ class Encoder(json.JSONEncoder):
 
 
 if __name__ == '__main__':
+    parser = ArgumentParser(
+        description=' '.join((
+            'a program to manipulate the gw2tp API to discover',
+            'information about items on the Guild Wars 2 Trading Post'
+        ))
+    )
+    parser.add_argument('-i', '--interactive', action='store_true',
+                        help='Operate in interactive mode')
+    args = parser.parse_args()
+
     # item ids, name
     Names = requests.get(
         "http://api.gw2tp.com/1/bulk/items-names.json"
@@ -132,27 +143,32 @@ if __name__ == '__main__':
         }
     }
 
-    while itemid := input('Enter an item ID: '):  # noqa: E203,E701,E231,E225,E999,E501
-        try:
-            ThisItem = Items[int(itemid)]
-            print(f'{ThisItem["Name"]} (id {itemid}):')
-            print(
-                f'  Buying:  {ThisItem["Buy"]} ({ThisItem["Demand"]} demand)'
-            )
-            print(
-                f'  Selling: {ThisItem["Sell"]} ({ThisItem["Supply"]} supply)'
-            )
-            print(f' {ThisItem["Name"]} velocity is {ThisItem["Velocity"]})')
-        except KeyError as e:
-            print(f'No item {itemid}')
-            pass
-        except ValueError as e:
-            print(f'Bad input type, {itemid} is not integer')
-            pass
-        except Exception as e:
-            print('Unknown exception:')
-            print(e)
-            pass
-    print('Good bye')
+    if args.interactive:
+        while itemid := input('Enter an item ID: '):  # noqa: E203,E701,E231,E225,E999,E501
+            try:
+                ThisItem = Items[int(itemid)]
+                print(f'{ThisItem["Name"]} (id {itemid}):')
+                print(
+                    f'  Buying:  {ThisItem["Buy"]}',
+                    f'({ThisItem["Demand"]} demand)'
+                )
+                print(
+                    f'  Selling: {ThisItem["Sell"]}',
+                    f'({ThisItem["Supply"]} supply)'
+                )
+                print(f' {ThisItem["Name"]} velocity is',
+                      f'{ThisItem["Velocity"]})')
+            except KeyError as e:
+                print(f'No item {itemid}')
+                pass
+            except ValueError as e:
+                print(f'Bad input type, {itemid} is not integer')
+                pass
+            except Exception as e:
+                print('Unknown exception:')
+                print(e)
+                pass
+        print('Good bye')
+
     with open('Output.json', mode='w+', encoding='utf-8') as outputfile:
         outputfile.write(json.dumps(Items, cls=Encoder))
