@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 
 import requests
 import json
@@ -62,36 +62,32 @@ class Gw2Velocity(object):
         self.supply = supply
         self.demand = demand
 
-        VelCircs = None
-        VelCircb = None
-        TotalVel = None
-
-        self.v1 = VelCircs
-        self.v2 = VelCircb
-        self.v3 = TotalVel
+    def Math(self) -> tuple:
+        """
+        Calculates math and returns buy, sell and total velocity as a tuple
+        """
+        try:
+            VelCircs = self.supply / self.sell
+            VelCircb = self.supply / self.buy
+            Total = self.buy + self.sell
+            Tvel = (self.supply + self.demand) / Total
+            return (VelCircs, VelCircb, Tvel)
+        except ZeroDivisionError as e:
+            print("Supply or Demand is 0")
+            print(e)
 
     def __str__(self) -> str:
         """
         First row is values for printing
         Second row is for json output
         """
-        try:
-            retval = '\n '
-            VelCircs = self.supply / self.sell
-            VelCircb = self.supply / self.buy
-            retval += 'Buy velocity: {}, \n Sell velocity: {}, \n '.format(
+        VelCircs, VelCircb, TVel = self.Math()
+        retval = '\n '
+        retval += 'Buy velocity: {}, \n Sell velocity: {}, \n '.format(
                 VelCircb, VelCircs
             )
-            TVel = self.supply + self.demand
-            Total = self.buy + self.sell
-            retval += 'Total Velocity(buy and sell): {}'.format(TVel / Total)
-            return retval
-        except Exception as b:
-            print('Supply or Demand is 0')
-            pass
-
-    def __repr__(self) -> str:
-        return "Gw2Velocity('" + str(self) + "')"
+        retval += 'Total Velocity(buy and sell): {}'.format(TVel)
+        return retval
 
 
 class Encoder(json.JSONEncoder):
@@ -100,11 +96,11 @@ class Encoder(json.JSONEncoder):
             gold, silver, copper = o.get_coins()
             return {'Gold': gold, 'Silver': silver, 'Copper': copper}
         if isinstance(o, Gw2Velocity):
-            return {
-                'Buy Velocity:': o.v1,
-                'Sell Velocity:': o.v2,
-                'Total Velocity:': o.v3
-            }
+            retval = o.Math()
+            return {'Sell Velocity': retval[0],
+                    'Buy Velocity': retval[1],
+                    'Total Velocity': retval[2]}
+
         return super(Encoder, self).default(o)
 
 
